@@ -1,0 +1,15 @@
+{
+  "name": "meera-telegram-bot",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Telegram bot that turns Meera's notes into draft posts in her voice using Gemini.",
+  "type": "module",
+  "engines": {
+    "node": ">=20.6"
+  },
+  "scripts": {
+    "try": "node --env-file=.env scripts/try-draft.js",
+    "set-webhook": "node --env-file=.env scripts/set-webhook.js",
+    "webhook-info": "node --env-file=.env scripts/webhook-info.js"
+  }
+}
