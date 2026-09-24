@@ -12,7 +12,8 @@
     "set-webhook": "node --env-file=.env scripts/set-webhook.js",
     "webhook-info": "node --env-file=.env scripts/webhook-info.js",
     "compare": "node --env-file=.env scripts/compare.js",
-    "seed-voice": "node --env-file=.env scripts/seed-voice.js"
+    "seed-voice": "node --env-file=.env scripts/seed-voice.js",
+    "news": "node --env-file=.env scripts/news.js"
   },
   "dependencies": {
     "@vercel/functions": "^3.9.9"

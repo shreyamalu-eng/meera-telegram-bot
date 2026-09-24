@@ -18,7 +18,7 @@ Meera sends a note (typed or a voice note) to a Telegram bot. The bot:
 | `api/telegram.js` | The address Telegram sends each message to (also reachable as `/api/webhook`). |
 | `lib/pipeline.js` | The steps above, in order. Also turns voice notes into text. |
 | `lib/score.js` | The 0–10 scoring rules. Edit here if scoring is too strict or too lenient. |
-| `lib/news.js` | Search words → Google News → most relevant headline. |
+| `lib/news.js` | Key terms → short Google News searches (India + global, last 30 days, widening to 6 months) → drops shopping lists, deals, market-report spam and off-topic headlines → Gemini picks the relevant one, or none. Preview with `npm run news -- "a note"`. |
 | `lib/draft.js` | Builds the draft request and the news warning box. |
 | `lib/voice.js` | Loads the voice skill (newest copy in Supabase, else `voice-skill.txt`). |
 | `lib/gemini.js`, `lib/claude.js` | Talk to Gemini and Claude, retrying when they're busy. |

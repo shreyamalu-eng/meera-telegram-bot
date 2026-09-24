@@ -8,5 +8,9 @@ if (!note) {
   process.exit(1);
 }
 const result = await runPipeline(note);
-if (result.news) console.log(`[news search: "${result.news.query}" → ${result.news.item?.headline ?? "nothing found"}]\n`);
+if (result.news) {
+  const { keywords, query, candidates, item } = result.news;
+  console.log(`[keywords: ${keywords.join(", ")}]\n[searches: ${query}] [${candidates ?? 0} candidates]`);
+  console.log(`[picked: ${item ? `${item.headline} (${item.source}) — ${item.why}` : "none relevant"}]\n`);
+}
 console.log(result.message);
