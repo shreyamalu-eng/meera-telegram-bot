@@ -82,9 +82,11 @@ async function handleMessage(updateId, message) {
   } catch (err) {
     console.error(err);
     await updateNote(noteId, { status: "error", error: String(err.message).slice(0, 500) }).catch(() => {});
-    await sendMessage(chatId, "Sorry, something went wrong with that note. Please try again in a minute.").catch(
-      () => {}
-    );
+    const reply = err.geminiUnavailable
+      ? "Gemini is out of free capacity right now, so I couldn't work on that note. " +
+        "Please send it again in an hour or so."
+      : "Sorry, something went wrong with that note. Please try again in a minute.";
+    await sendMessage(chatId, reply).catch(() => {});
   }
 }
 
