@@ -2,7 +2,8 @@
   "functions": {
     "api/telegram.js": {
       "includeFiles": "voice-skill.txt",
-      "maxDuration": 60
+      "maxDuration": 300
     }
-  }
+  },
+  "rewrites": [{ "source": "/api/webhook", "destination": "/api/telegram" }]
 }

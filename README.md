@@ -1,39 +1,48 @@
 # Meera's draft bot
 
-Meera texts a note to a Telegram bot. The bot sends the note to Gemini along with the
-instructions in `voice-skill.txt`, then replies in the same chat with a draft post.
+Meera sends a note (typed or a voice note) to a Telegram bot. The bot:
+
+1. **Scores** the note 0–10 with Gemini. Below 6, it replies with the reason and stops.
+2. **Finds news**: Gemini picks search words, the bot searches Google News, and Gemini keeps the most
+   relevant result (or none).
+3. **Drafts** the post in Meera's voice. The whole of `voice-skill.txt` is sent as the model's instructions.
+   Drafts that use a news item end with the source, date, link and a "check this before publishing" warning.
+4. **Saves** the note and the draft in Supabase (status `pending`). Meera replies **APPROVE** or **REJECT**
+   to the draft and the status updates. Nothing is ever posted for her.
 
 ## What's in here
 
 | File | What it does |
 |---|---|
-| `voice-skill.txt` | **How Meera writes.** Paste the voice instructions here. |
-| `api/telegram.js` | The address Telegram sends each message to. Replies with the draft. |
-| `lib/draft.js` | Sends the note plus `voice-skill.txt` to Gemini. |
-| `lib/telegram.js` | Sends messages back to Telegram. |
-| `scripts/` | Helpers for testing and connecting Telegram. |
+| `voice-skill.txt` | **How Meera writes.** Sent to Gemini/Claude with every draft. |
+| `api/telegram.js` | The address Telegram sends each message to (also reachable as `/api/webhook`). |
+| `lib/pipeline.js` | The steps above, in order. Also turns voice notes into text. |
+| `lib/score.js` | The 0–10 scoring rules. Edit here if scoring is too strict or too lenient. |
+| `lib/news.js` | Search words → Google News → most relevant headline. |
+| `lib/draft.js` | Builds the draft request and the news warning box. |
+| `lib/voice.js` | Loads the voice skill (newest copy in Supabase, else `voice-skill.txt`). |
+| `lib/gemini.js`, `lib/claude.js` | Talk to Gemini and Claude, retrying when they're busy. |
+| `lib/db.js` | Saves to Supabase. Does nothing if Supabase isn't set up. |
+| `lib/telegram.js` | Sends messages to Telegram and downloads voice notes. |
+| `supabase/schema.sql` | Creates the three tables: notes, drafts, voice_skill. |
 | `.env.example` | List of the keys the bot needs. |
+
+## Commands (run in this folder)
+
+- `npm run try -- "a rough note"` — run the whole pipeline on your computer, nothing saved or sent.
+- `npm run compare -- "a rough note"` — draft the same note with Gemini and Claude, side by side.
+- `npm run seed-voice` — copy `voice-skill.txt` into Supabase.
+- `npm run set-webhook -- https://YOUR-PROJECT.vercel.app` — connect Telegram to the bot.
+- `npm run webhook-info` — see the last error Telegram got when reaching the bot.
 
 ## Setup
 
-1. **Create the bot.** In Telegram, message `@BotFather`, send `/newbot`, and copy the token it gives you.
-2. **Get a Gemini key** at https://aistudio.google.com/apikey.
-3. **Fill in the keys.** Copy `.env.example` to `.env` and fill it in. Leave `ALLOWED_CHAT_IDS` empty for now.
-4. **Add the voice.** Replace the contents of `voice-skill.txt` with Meera's writing instructions.
-5. **Try it on your computer (optional):** `npm run try -- "some rough note"` prints a draft.
-6. **Deploy to Vercel.** Run `vercel` in this folder (or import it on vercel.com). In the Vercel
-   project, go to Settings → Environment Variables and add the same values from `.env`.
-   Then redeploy (`vercel --prod`).
-7. **Connect Telegram to Vercel:** `npm run set-webhook -- https://YOUR-PROJECT.vercel.app`
-8. **Lock it to Meera.** Have Meera send `/start` to the bot. It replies with her chat ID.
-   Put that number in `ALLOWED_CHAT_IDS` on Vercel and redeploy.
+1. Create a bot with `@BotFather` in Telegram and get a Gemini key at https://aistudio.google.com/apikey.
+2. Copy `.env.example` to `.env` and fill it in.
+3. Supabase: paste `supabase/schema.sql` into the SQL Editor and run it, then `npm run seed-voice`.
+4. Deploy to Vercel and add the same values under Settings → Environment Variables.
+5. `npm run set-webhook -- https://YOUR-PROJECT.vercel.app`
+6. Send `/start` to the bot. It replies with the chat ID — put it in `ALLOWED_CHAT_IDS` so only Meera can use it.
 
-## Changing the voice later
-
-Edit `voice-skill.txt` and redeploy. Every new note uses the updated instructions.
-
-## If it isn't replying
-
-- `npm run webhook-info` shows the last error Telegram got when it tried to reach the bot.
-- Vercel → your project → Logs shows errors from the bot itself.
-- If you change `TELEGRAM_WEBHOOK_SECRET`, run step 7 again.
+To use a Telegram **channel** instead of a private chat, add the bot to the channel as an admin and put the
+channel's ID (the bot tells you it) in `ALLOWED_CHAT_IDS`.

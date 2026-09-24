@@ -11,7 +11,7 @@ if (!base.startsWith("https://")) {
 const url = `${base}/api/telegram`;
 await telegramApi("setWebhook", {
   url,
-  allowed_updates: ["message"],
+  allowed_updates: ["message", "channel_post"],
   drop_pending_updates: true,
   ...(process.env.TELEGRAM_WEBHOOK_SECRET ? { secret_token: process.env.TELEGRAM_WEBHOOK_SECRET } : {}),
 });
